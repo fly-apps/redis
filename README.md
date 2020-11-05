@@ -44,7 +44,7 @@ With these two files in place we're ready to put Redis onto Fly.
 First, we need a configuration file - and a slot on Fly - for our new application. We'll use the `fly init` command. The parameter is the app name we want - names have to be unique so choose a new unique one or omit the name in the command line and let Fly choose a name for you.
 
 ```cmd
-> fly init redis-example
+fly init redis-example
 ```
 ```out
 Selected App Name: redis-example
@@ -86,7 +86,7 @@ This will direct external traffic on port 10000 to internal port 6379. Save the 
 Our script takes a password from an environment variable to secure Redis. We need to set that now using the `fly secrets` command. This encrypts the value so it can't leak out; the only time it is decoded is into the Fly application as an environment variable.
 
 ```
-> flyctl secrets set REDIS_PASSWORD=<a password>
+flyctl secrets set REDIS_PASSWORD=<a password>
 ```
 
 And of course, remember that password because you won't be able to get it back.
@@ -96,7 +96,7 @@ And of course, remember that password because you won't be able to get it back.
 The last step is to create a disk volume for Redis to save its state on. Then the Redis can be restarted without losing data. For Fly apps, the volume needs to be in the same region as the app. We saw that region when we initialized the app; here it's `ord`. We'll give the volume the name `redis_server`. 
 
 ```cmd
-> flyctl volumes create redis_server --region ord
+flyctl volumes create redis_server --region ord
 ```
 ```out
       Name: redis_server
@@ -125,5 +125,5 @@ We're ready to deploy now. Run `fly deploy` and the Redis app will be created an
 
 ## Discuss
 
-* You can discuss this example on the [community.fly.io](https://community.fly.io) topic.
+* You can discuss this example on the [community.fly.io](https://community.fly.io/t/new-redis-example/366) topic.
 
