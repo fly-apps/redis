@@ -3,21 +3,21 @@
 app = "redis-example"
 
 [[mounts]]
-source = "redis_server"
+source      = "redis_server"
 destination = "/data"
 
 [[services]]
-  internal_port = 6379
-  protocol = "tcp"
+internal_port = 6379
+protocol      = "tcp"
 
   [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
+  hard_limit = 25
+  soft_limit = 20
 
   [[services.ports]]
-    handlers = []
-    port = "10000"
+  handlers = []
+  port     = "10000"
 
   [[services.tcp_checks]]
-    interval = 10000
-    timeout = 2000
+  interval = 10000
+  timeout  = 2000
