@@ -7,7 +7,7 @@ source      = "redis_server"
 destination = "/data"
 
 [[services]]
-internal_port = 6379
+internal_port = 7379
 protocol      = "tcp"
 
   [services.concurrency]

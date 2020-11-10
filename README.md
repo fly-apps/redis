@@ -19,23 +19,42 @@ There's a couple of components to this example. We're going to use the official 
 #!/bin/sh
 sysctl vm.overcommit_memory=1
 sysctl net.core.somaxconn=1024
-redis-server --requirepass $REDIS_PASSWORD --bind 0.0.0.0 --dir /data/ --appendonly yes
+
+# pass env vars as server args
+redis-server /usr/local/etc/redis/redis.conf --requirepass $REDIS_PASSWORD
 ```
 
-This sets up ...
+This sets the VM system settings to Redis recommended values.
 
-It then starts up the Redis server, giving it a password to require and a directory to persist into using . Now we need to make those changes apply to a new Redis deployment. For that we use this `Dockerfile`:
+It then starts up the Redis server, giving it a password to require and a config file to boot with. The Redis config is simple – it defines IPs to listen on, persistence options:
+
+```conf
+# listen on all ipv4 and ipv6 addresses
+bind 0.0.0.0 ::
+
+# write to /data/
+dir /data/
+
+# appendonly settings
+appendonly yes
+auto-aof-rewritepercentage 100
+auto-aof-rewrite-min-size 64mb
+```
+
+Now we need to make those changes apply to a new Redis deployment. For that we use this `Dockerfile`:
 
 ```dockerfile
 FROM redis:alpine
 
+ADD redis.conf /usr/local/etc/redis/redis.conf
 ADD start-redis-server.sh /usr/bin/
+ADD certs /etc/certs
 RUN chmod +x /usr/bin/start-redis-server.sh
 
 CMD ["start-redis-server.sh"]
 ```
 
-It adds our new shell script to the image, makes it executable, and makes the image start by running that shell script.
+It adds our new shell script to the image, makes it executable, adds the redis config, and boots the container with the shell script.
 
 With these two files in place we're ready to put Redis onto Fly.
 
@@ -113,15 +132,79 @@ source      = "redis_server"
 destination = "/data"
 ```
 
-When the app starts, that volume will be mounted on /data. 
+When the app starts, that volume will be mounted on /data.
 
 ## Deploy
-
 We're ready to deploy now. Run `fly deploy` and the Redis app will be created and launched on the cloud. Once complete you can connect to it using the `redis-cli` command or any other redis client.  Just remember to use port 10000, not the default port.
 
-## Notes
+```
+redis-cli -h redis-example.fly.dev \
+          -p 10000 \
+          --askpass
+```
 
-* This configuration sets Redis with mostly default settings. 
+## Lock it down with TLS
+
+So far, our Redis configuration is good for a demo. But running Redis on a public port with password authentication is insecure.
+
+Redis has built in TLS support, we generate certificates and configure the server to require client certificate validation. This is roughly the equivalent security level as running behind a VPN.
+
+Generating certs is simple with the excellent [`mkcert`](https://github.com/FiloSottile/mkcert) utility. Once you install `mkcert`, you'll get a local certificate authority to create your own certificates with.
+
+Here are the commands you'll need to create certificates for this Redis example:
+
+1. Create `certs` directory for the Docker image:
+  
+    `mkdir -p certs`
+2. Generate server certificates:
+
+   `mkcert -key-file certs/redis-server.key -cert-file certs/redis-server.crt redis-example.fly.dev`
+3. Generate a client certificate:
+
+    `mkcert --client -key-file redis-client.key -cert-file redis-client.crt redis-example.fly.dev`
+4. Copy the root CA certificate:
+
+    `cp "$(mkcert -CAROOT)/rootCA.pem" certs/rootCA.crt`
+
+When you're done you should see a directory layout like this:
+
+* `/certs`
+    * `/redis-server.crt`
+    * `/redis-server.key`
+    * `/rootCA.crt`
+* `/redis-client.crt`
+* `/redis-client.key`
+
+Then, we can pop on into the `redis.conf` to configure TLS:
+
+```conf
+tls-port 7379
+tls-cert-file /etc/certs/server.pem
+tls-key-file /etc/certs/server-key.pem
+tls-ca-cert-file /etc/certs/rootCA.crt
+```
+
+This configures Redis to listen on port 7379, which means updating the internal port in `fly.toml`:
+
+```toml
+[[services]]
+internal_port = 7379
+...
+```
+
+Now run `fly deploy` again, and enjoy the relaxation of a locked down Redis service.
+
+The `redis-cli` CLI has support for TLS, you can connect with this command:
+
+```
+redis-cli -h redis-example.fly.dev \
+          -p 10000 \
+          --cert redis-client.crt \
+          --key redis-client.key \
+          --tls \
+          --cacert certs/rootCA.pem \
+          --askpass
+```
 
 ## Discuss
 
