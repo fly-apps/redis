@@ -22,9 +22,7 @@ sysctl net.core.somaxconn=1024
 redis-server --requirepass $REDIS_PASSWORD --bind 0.0.0.0 --dir /data/ --appendonly yes
 ```
 
-This sets up ...
-
-It then starts up the Redis server, giving it a password to require and a directory to persist into using . Now we need to make those changes apply to a new Redis deployment. For that we use this `Dockerfile`:
+The two `sysctl` calls set up the environment so that Redis doesn't throw warnings about memory and connections. The script then starts up the Redis server, giving it a password to require and a directory to persist into using . Now we need to make those changes apply to a new Redis deployment. For that we use this `Dockerfile`:
 
 ```dockerfile
 FROM redis:alpine
