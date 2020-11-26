@@ -3,6 +3,8 @@
 
 Deploying Redis using Fly.
 
+[Read this guide on Fly.](https://fly.io/docs/app-guides/redis/)
+
 <!---- cut here --->
 
 ## Rationale
