@@ -21,7 +21,7 @@ There's a couple of components to this example. We're going to use the official 
 #!/bin/sh
 sysctl vm.overcommit_memory=1
 sysctl net.core.somaxconn=1024
-redis-server --requirepass $REDIS_PASSWORD --bind 0.0.0.0 --dir /data/ --appendonly yes
+redis-server --requirepass $REDIS_PASSWORD  --dir /data/ --appendonly yes
 ```
 
 The two `sysctl` calls set up the environment so that Redis doesn't throw warnings about memory and connections. The script then starts up the Redis server, giving it a password to require and a directory to persist into using . Now we need to make those changes apply to a new Redis deployment. For that we use this `Dockerfile`:
@@ -41,45 +41,13 @@ With these two files in place we're ready to put Redis onto Fly.
 
 ## Configuring
 
-First, we need a configuration file - and a slot on Fly - for our new application. We'll use the `fly init` command. The parameter is the app name we want - names have to be unique so choose a new unique one or omit the name in the command line and let Fly choose a name for you.
+First, we need a configuration file - and a slot on Fly - for our new application. We'll use the `fly launch` command. The parameter is the app name we want - names have to be unique so choose a new unique one or omit the name in the command line and let Fly choose a name for you.
 
 ```cmd
-fly init redis-example
-```
-```out
-Selected App Name: redis-example
-
-? Select organization: Demo Sandbox (demo-sandbox)
-
-? Select builder: Dockerfile
-    (Do not set a builder and use the existing Dockerfile)
-? Select Internal Port: 6379
-
-New app created
-  Name         = redis-example
-  Organization = demo-sandbox
-  Version      = 0
-  Status       =
-  Hostname     = <empty>
-
-App will initially deploy to ord (Chicago, Illinois (US)) region
-
-Wrote config file fly.toml
+fly launch --name a-unique-app-name
 ```
 
-The important choices here are we select a Dockerfile (the one we created) as the builder for this app and we set the internal port to 6379, the default port for Redis. Do take note of which region here the init command says the app will initially deploy into. We'll need that in a moment.
-
-This will generate a new fly.toml file which we'll need to edit. By default, the `fly.toml` takes the internal port and connects it to an HTTP only handler on port 80 and a combined TLS/HTTP handler on port 443. We don't need that at all, we just need a straight-through connection to the internal port. 
-
-Edit your generated `fly.toml`, removing both `[[services.ports]]` entries for ports 80 and 443 and replacing them with a single entry:
-
-```
-  [[services.ports]]
-    handlers = []
-    port = "10000"
-```
-
-This will direct external traffic on port 10000 to internal port 6379. Save the file for now.
+By default, this Redis installation will only accept connections on the private IPv6 network. If you want internet access, uncomment the `[[services]]` section in `fly.toml`. 
 
 ## Keeping a secret
 
@@ -105,7 +73,7 @@ flyctl volumes create redis_server --region ord
 Created at: 02 Nov 20 19:55 UTC
 ```
 
-To connect this volume to the app, pop back to editing fly.toml and add:
+To connect this volume to the app, `fly.toml` includes a `[[mounts]]` entry.
 
 ```
 [[mounts]]
@@ -117,7 +85,7 @@ When the app starts, that volume will be mounted on /data.
 
 ## Deploy
 
-We're ready to deploy now. Run `fly deploy` and the Redis app will be created and launched on the cloud. Once complete you can connect to it using the `redis-cli` command or any other redis client.  Just remember to use port 10000, not the default port.
+We're ready to deploy now. Run `fly deploy` and the Redis app will be created and launched on the cloud. Once complete you can connect to it using the `redis-cli` command or any other redis client from another application on the internal network.
 
 ## Notes
 
