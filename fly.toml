@@ -4,17 +4,18 @@ app = "redis-example"
   destination = "/data"
   source = "redis_server"
 
-# If you want public internet access to Redis on port 10000, uncomment these lines
+# Use the Docker image instead of building from source
+#
+# [build]
+#   image = "flyio/redis:6.2.6"
+
+# Uncomment these lines for public internet access to Redis on port 10000
 #
 # [[services]]
 # internal_port = 6379
 # protocol      = "tcp"
 
-#   [services.concurrency]
-#   hard_limit = 25
-#   soft_limit = 20
 #   [[services.ports]]
-#   handlers = []
 #   port     = "10000"
 
 #   [[services.tcp_checks]]
