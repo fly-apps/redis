@@ -8,7 +8,6 @@ app = "redis-example"
   port = 9091
   path = "/metrics"
 
-
 # Use the Docker image instead of building from source
 #
 # [build]
