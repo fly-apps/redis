@@ -9,9 +9,9 @@ app = "redis-example"
   path = "/metrics"
 
 # Use the Docker image instead of building from source
-#
-# [build]
-#   image = "flyio/redis:6.2.6"
+
+[build]
+  image = "flyio/redis:6.2.6-v2"
 
 # Uncomment these lines for public internet access to Redis on port 10000
 #
