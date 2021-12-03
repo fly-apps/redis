@@ -29,7 +29,7 @@ jobs:
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
       -
         name: Build and push Redis 6.2.6
-        id: docker_build_13
+        id: docker_build_6
         uses: docker/build-push-action@v2
         with:
           build-args: |
@@ -38,7 +38,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            flyio/redis:6.2.6-${{ steps.get-latest-tag.outputs.tag }}
+            flyio/redis:6.2.6
+            flyio/redis:6.2
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
