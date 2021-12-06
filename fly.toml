@@ -4,6 +4,9 @@ app = "redis-example"
   destination = "/data"
   source = "redis_server"
 
+[secrets]
+  required = ["REDIS_PASSWORD"]
+
 [metrics]
   port = 9091
   path = "/metrics"
