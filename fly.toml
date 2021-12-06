@@ -1,6 +1,6 @@
 app = "redis-example"
 
-[[mounts]]
+[mounts]
   destination = "/data"
   source = "redis_server"
 
