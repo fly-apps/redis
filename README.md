@@ -25,10 +25,10 @@ flyctl volumes create redis_server --region ord
 Created at: 02 Nov 20 19:55 UTC
 ```
 
-To connect this volume to the app, `fly.toml` includes a `[[mounts]]` entry.
+To connect this volume to the app, `fly.toml` includes a `[mounts]` entry.
 
 ```
-[[mounts]]
+[mounts]
 source      = "redis_server"
 destination = "/data"
 ```
