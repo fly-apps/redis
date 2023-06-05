@@ -5,9 +5,9 @@ set -e
 sysctl vm.overcommit_memory=1 || true
 sysctl net.core.somaxconn=1024 || true
 
-if [[ -z "${REDIS_PASSWORD}" ]]; then
-  echo "The REDIS_PASSWORD environment variable is required"
-  exit 1
+PW_ARG=""
+if [[ ! -z "${REDIS_PASSWORD}" ]]; then
+  PW_ARG="--requirepass $REDIS_PASSWORD"
 fi
 
 # Set maxmemory-policy to 'allkeys-lru' for caching servers that should always evict old keys
@@ -18,7 +18,7 @@ fi
 # Set maxmemory to 10% of available memory
 MAXMEMORY=$(($FLY_VM_MEMORY_MB*90/100))
 
-redis-server --requirepass $REDIS_PASSWORD \
+redis-server $PW_ARG \
   --dir /data/ \
   --maxmemory "${MAXMEMORY}mb" \
   --maxmemory-policy $MAXMEMORY_POLICY \
