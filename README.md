@@ -34,3 +34,15 @@ destination = "/data"
 ```
 
 When the app starts, that volume will be mounted on /data. 
+
+## Cutting a release
+
+If you have write access to this repo, you can ship a prerelease or full release with:
+
+```
+scripts/bump_version.sh
+```
+or
+```
+scripts/bump_version.sh prerel
+```
