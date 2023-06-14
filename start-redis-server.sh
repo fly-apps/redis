@@ -14,8 +14,9 @@ fi
 : ${MAXMEMORY_POLICY:="volatile-lru"}
 : ${APPENDONLY:="no"}
 : ${FLY_VM_MEMORY_MB:=512}
-: ${SAVE:="3600 1 300 100 60 10000"}
-
+if [ "${NOSAVE}" = "" ] ; then
+  : ${SAVE:="3600 1 300 100 60 10000"}
+fi
 # Set maxmemory to 10% of available memory
 MAXMEMORY=$(($FLY_VM_MEMORY_MB*90/100))
 
