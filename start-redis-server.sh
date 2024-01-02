@@ -7,7 +7,7 @@ sysctl net.core.somaxconn=1024 || true
 
 PW_ARG=""
 if [[ ! -z "${REDIS_PASSWORD}" ]]; then
-  PW_ARG="--requirepass $REDIS_PASSWORD"
+  PW_ARG="--requirepass \"$REDIS_PASSWORD\""
 fi
 
 # Set maxmemory-policy to 'allkeys-lru' for caching servers that should always evict old keys
@@ -20,7 +20,7 @@ fi
 # Set maxmemory to 10% of available memory
 MAXMEMORY=$(($FLY_VM_MEMORY_MB*90/100))
 
-redis-server $PW_ARG \
+redis-server "$PW_ARG" \
   --dir /data/ \
   --maxmemory "${MAXMEMORY}mb" \
   --maxmemory-policy $MAXMEMORY_POLICY \
