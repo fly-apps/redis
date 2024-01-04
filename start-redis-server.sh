@@ -6,7 +6,7 @@ sysctl vm.overcommit_memory=1 || true
 sysctl net.core.somaxconn=1024 || true
 
 PW_ARG=""
-if [[ ! -z "${REDIS_PASSWORD}" ]]; then
+if [ -z "${REDIS_PASSWORD}" ]; then
   PW_ARG="--requirepass $REDIS_PASSWORD"
 fi
 
@@ -14,7 +14,7 @@ fi
 : ${MAXMEMORY_POLICY:="volatile-lru"}
 : ${APPENDONLY:="no"}
 : ${FLY_VM_MEMORY_MB:=512}
-if [ "${NOSAVE}" = "" ] ; then
+if [ -z "${NOSAVE}" ] ; then
   : ${SAVE:="3600 1 300 100 60 10000"}
 fi
 # Set maxmemory to 10% of available memory
